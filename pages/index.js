@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import Head from "next/head";
+import abi from "../utils/SongPortal.json";
 
 function Home() {
   const [currentAccount, setCurrentAccount] = useState("");
+
+  const contractAddress = "0x3e9d0ed6967eBB254dE6b7b8fe07386eE943eE05";
+
+  const contractABI = abi.abi;
 
   const checkIfWalletIsConnected = async () => {
     try {
@@ -58,6 +63,31 @@ function Home() {
     }
   };
 
+  //the push song function - calls the function on the contract
+  const song = async () => {
+    console.log("Song button called");
+    try {
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const songPortalContract = new ethers.Contract(
+          contractAddress,
+          contractABI,
+          signer
+        );
+
+        let count = await songPortalContract.getTotalSongs();
+        console.log("Retrieved total songs count...", count.toNumber());
+      } else {
+        console.log("Ethereum object doesn't exist!");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   /*
    * This runs our function when the page loads.
    */
@@ -90,7 +120,7 @@ function Home() {
         <div className="song-form mt-8">
           <button
             className="w-full p-4 bg-gray-900 rounded-lg text-white hover:bg-gray-200 hover:text-gray-800 transition-all duration-500"
-            onClick={null}
+            onClick={song}
           >
             Send my song
           </button>
