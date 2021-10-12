@@ -1,18 +1,59 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 
 function Home() {
-  const checkIfWalletIsConnected = () => {
-    /*
-     * First make sure we have access to window.ethereum
-     */
-    const { ethereum } = window;
+  const [currentAccount, setCurrentAccount] = useState("");
 
-    if (!ethereum) {
-      console.log("Make sure you have metamask!");
-      return;
-    } else {
-      console.log("We have the ethereum object", ethereum);
+  const checkIfWalletIsConnected = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (!ethereum) {
+        console.log(
+          "Make sure you have metamask and are logged in to your Rinkeby account."
+        );
+        return;
+      } else {
+        console.log("We have the ethereum object", ethereum);
+      }
+
+      /*
+       * Check if we're authorized to access the user's wallet
+       */
+      const accounts = await ethereum.request({ method: "eth_accounts" });
+
+      if (accounts.length !== 0) {
+        const account = accounts[0];
+        console.log("Found an authorized account:", account);
+        setCurrentAccount(account);
+      } else {
+        console.log("No authorized account found");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  /**
+   * Implement your connectWallet method here
+   */
+  const connectWallet = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (!ethereum) {
+        alert("Get MetaMask!");
+        return;
+      }
+
+      const accounts = await ethereum.request({
+        method: "eth_requestAccounts",
+      });
+
+      console.log("Connected", accounts[0]);
+      setCurrentAccount(accounts[0]);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -37,9 +78,23 @@ function Home() {
       </p>
 
       <div className="song-form mt-8">
-        <button className="w-full p-4 bg-gray-900 rounded-lg text-white hover:bg-gray-200 hover:text-gray-800 transition-all duration-500">
+        <button
+          className="w-full p-4 bg-gray-900 rounded-lg text-white hover:bg-gray-200 hover:text-gray-800 transition-all duration-500"
+          onClick={null}
+        >
           Send my song
         </button>
+      </div>
+
+      <div className="connect-account mt-8">
+        {!currentAccount && (
+          <button
+            className="waveButton bg-yellow-200 px-5 py-3 rounded-lg"
+            onClick={connectWallet}
+          >
+            Connect your MetaMask Wallet
+          </button>
+        )}
       </div>
     </div>
   );
