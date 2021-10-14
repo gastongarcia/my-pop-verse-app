@@ -8,7 +8,7 @@ function Home() {
 
   const [allSongs, setAllSongs] = useState([]);
 
-  const contractAddress = "0x0F64a3575B7E52072AB885BbBEBb14D2fB1DFc61";
+  const contractAddress = "0x7AA8FC3c0407B3eFCaD928cD7E94bE018fe102b3";
 
   const contractABI = abi.abi;
 
