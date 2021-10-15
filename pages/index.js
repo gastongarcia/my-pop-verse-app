@@ -10,7 +10,9 @@ function Home() {
 
   const [isMining, setIsMining] = useState(false);
 
-  const contractAddress = "0xd204051b97Df432a7226Fa7b7aaa5674c460b9f6";
+  const [songSent, setSongSent] = useState(false);
+
+  const contractAddress = "0x9A40023dA087d923911eB2248D28Aa0c2Cad54FB";
 
   const contractABI = abi.abi;
 
@@ -81,10 +83,12 @@ function Home() {
   };
 
   const getAllSongs = async () => {
-    console.log(`Get getAllSongs function called`);
+    //console.log(`Get getAllSongs function called`);
+
+    const { ethereum } = window;
+
     try {
-      const { ethereum } = window;
-      if (ethereum) {
+      if (window.ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         const songPortalContract = new ethers.Contract(
@@ -94,9 +98,7 @@ function Home() {
         );
 
         const songs = await songPortalContract.getAllSongs();
-        console.log(
-          `This is the songs object, called from getAllSongs function in react: ${songs}`
-        );
+        //console.log(`This is the songs object, called from getAllSongs function in react: ${songs}`);
 
         /*
          * We only need address, timestamp, and message in our UI so let's
@@ -112,6 +114,21 @@ function Home() {
         });
 
         setAllSongs(songsCleaned);
+
+        //listen for emmiter events in case someone uses the app
+
+        songPortalContract.on("NewSong", (from, timestamp, message) => {
+          console.log("New Song", from, timestamp, message);
+
+          setAllSongs((prevState) => [
+            ...prevState,
+            {
+              address: from,
+              timestamp: new Date(timestamp * 1000),
+              message: message,
+            },
+          ]);
+        });
       } else {
         console.log("Ethereum object doesn't exist.");
       }
@@ -148,6 +165,7 @@ function Home() {
         await songTxn.wait();
         //console.log("Mined -- ", songTxn.hash);
         setIsMining(false);
+        setSongSent(true);
 
         count = await songPortalContract.getAllSongs();
         console.log("Retrieved total song count...", count);
@@ -199,7 +217,9 @@ function Home() {
 
         {isMining && (
           <div className="ml-1 mining_now mt-5 mb-3">
-            <h4 className="text-lg text-black">Be patient, we're mining</h4>
+            <h4 className="text-lg text-black">
+              Patience, we're mining your song!
+            </h4>
             <img
               src="https://media1.giphy.com/media/XjXtEuBHulPcQ/giphy.gif"
               alt="Mining"
@@ -240,13 +260,15 @@ function Home() {
           })}
         </div>
 
-        <div className="lionel mt-8 text-center lg:text-left">
-          <img
-            src="https://thumbs.gfycat.com/BrilliantSplendidDuiker-max-1mb.gif"
-            alt="Lionel"
-            className=" mx-auto lg:ml-1 border border-gray-800"
-          />
-        </div>
+        {songSent && (
+          <div className="lionel mt-8 text-center lg:text-left">
+            <img
+              src="https://thumbs.gfycat.com/BrilliantSplendidDuiker-max-1mb.gif"
+              alt="Lionel"
+              className=" mx-auto lg:ml-1 border border-gray-800"
+            />
+          </div>
+        )}
       </div>
     </div>
   );
