@@ -8,7 +8,9 @@ function Home() {
 
   const [allSongs, setAllSongs] = useState([]);
 
-  const contractAddress = "0xD8db0E3570d01f036a1A8CE4d9a40a5F4F9F92a8";
+  const [isMining, setIsMining] = useState(false);
+
+  const contractAddress = "0xd204051b97Df432a7226Fa7b7aaa5674c460b9f6";
 
   const contractABI = abi.abi;
 
@@ -140,10 +142,12 @@ function Home() {
          * Execute the actual song from your smart contract
          */
         const songTxn = await songPortalContract.song("This is a message");
-        console.log("Mining...", songTxn.hash);
+        //console.log("Mining...", songTxn.hash);
+        setIsMining(true);
 
         await songTxn.wait();
-        console.log("Mined -- ", songTxn.hash);
+        //console.log("Mined -- ", songTxn.hash);
+        setIsMining(false);
 
         count = await songPortalContract.getAllSongs();
         console.log("Retrieved total song count...", count);
@@ -175,13 +179,13 @@ function Home() {
         />
       </Head>
       <div className="w-full p-3 lg:p-0 lg:w-2/3 mx-auto m-1">
-        <h1 className="text-4xl text-blue-900 py-4 lg:py-8">
-          Pop Songs Through The Ether 🥤
+        <h1 className="text-4xl text-blue-900 py-4 lg:py-8 text-center bg-white rounded-lg lg:mt-10">
+          Send A Pop Song 🥤
         </h1>
-        <p className="text-gray-900 mt-5">
+        <p className="text-gray-900 mt-5 text-lg">
           You can send me a Pop Song using the button below.
         </p>
-        <p className="text-gray-900">I'll play it at least once.</p>
+
         <p className="text-gray-900">
           And maybe, if I like it, I'll play it{" "}
           <span className="font-bold">All Night Long</span>.
@@ -191,6 +195,17 @@ function Home() {
           <p className="text-gray-900 text-2xl mt-8">
             Total songs sent to me so far: {allSongs.length}
           </p>
+        )}
+
+        {isMining && (
+          <div className="ml-1 mining_now mt-5 mb-3">
+            <h4 className="text-lg text-black">Be patient, we're mining</h4>
+            <img
+              src="https://media1.giphy.com/media/XjXtEuBHulPcQ/giphy.gif"
+              alt="Mining"
+              style={{ maxWidth: "220px", border: "2px solid white" }}
+            />
+          </div>
         )}
 
         <div className="song-form mt-8">
